@@ -29,6 +29,7 @@ def save_puzzle_to_json(
             "date": datetime.now().strftime("%d/%m/%Y"),
             "hints": hints_dict,
             "answer":answer,
+            "solved":False,
         }
     )
 

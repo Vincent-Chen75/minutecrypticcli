@@ -1,30 +1,11 @@
-import decoder
+import utils
 from datetime import datetime, timedelta
 import sys
-import math
-
-JSON_FILE = "minutecryptic.json"
-
-def rainbow_rgb(string:str):
-    result = []
-    for i, char in enumerate(string):
-        if char == " ":
-            result.append(" ")
-            continue
-        
-        frequency = 0.3
-        r = int(math.sin(frequency * i + 0) * 127 + 128)
-        g = int(math.sin(frequency * i + 2) * 127 + 128)
-        b = int(math.sin(frequency * i + 4) * 127 + 128)
-        
-        result.append(f"\033[38;2;{r};{g};{b}m{char}")
-
-    result.append("\033[0m")
-    return "".join(result)
 
 def show_help():
     print("\033[33m=\033[0m"*50+'\n'+'\033[32mDD/MM/YYYY\033[0m : returns the clue of the day DD/MM/YYYY\n'
           '\033[32mtoday\033[0m : play the clue of the day\n'
+          '\033[32mnext\033[0m : play the next unsolved clue\n'
           '\033[32mquit\033[0m or \033[32mexit\033[0m will stop the program\n' + "\033[33m=\033[0m"*50)
 
 def show_in_game_help():
@@ -37,7 +18,7 @@ def show_in_game_help():
 
 def start_game_handler():
     while True: 
-        user_input = input(rainbow_rgb('Welcome to Minute Cryptic CLI (type "help" for commands): '))
+        user_input = input(utils.rainbow_rgb('Welcome to Minute Cryptic CLI (type "help" for commands): '))
 
         match user_input.strip().lower().split():
             case ["quit"] | ["exit"]:
@@ -47,6 +28,9 @@ def start_game_handler():
             case ["today"]:
                 today = datetime.now().strftime("%d/%m/%Y")
                 game_handler(today)
+            case ["next"]:
+                date = utils.get_last_unsolved_clue()
+                game_handler(date)
             case[date]:
                 game_handler(date)
             case []:
@@ -64,7 +48,7 @@ def clue_handler(clue, date):
             case ["clue"]:
                 print("\033[33m=\033[0m"*50+'\n'+f"The clue is :\n{clue}\n" +"\033[33m=\033[0m"*50)
             case ["hints"]:
-                print("\033[33m=\033[0m"*50+'\n'+str(decoder.get_hint(clue, "keys"))+'\n' + "\033[33m=\033[0m"*50)
+                print("\033[33m=\033[0m"*50+'\n'+str(utils.get_hint(date, "keys"))+'\n' + "\033[33m=\033[0m"*50)
             case ["hint", num]:
                 num_int = None
                 try:
@@ -72,21 +56,24 @@ def clue_handler(clue, date):
                 except:
                     print("<num> must be an integer !\n" +"\033[33m=\033[0m"*50)
                 if num_int != None:
-                    hints_count = len(decoder.get_hint(clue, "keys"))
+                    hints_count = len(utils.get_hint(date, "keys"))
                     if num_int > hints_count or num_int <= 0:
                         print("\033[33m=\033[0m"*50+'\n'+f"Choose the right bounds for <num>, here [1, {hints_count}]\n" +"\033[33m=\033[0m"*50)
                     else:
-                        print(decoder.get_hint(clue, "values", JSON_FILE, num_int) + "\n"+"\033[33m=\033[0m"*50)
+                        print("\033[33m=\033[0m"*50+ "\n" +utils.get_hint(date, "values", num_int) + "\n"+"\033[33m=\033[0m"*50)
             case ["help"]:
                 show_in_game_help()
             case ["quit"] | ["exit"]:
                 sys.exit()
             case [proposed_answer]:
-                result = decoder.check_answer(clue, proposed_answer)
+                result = utils.check_answer(date, proposed_answer)
                 if not result:
                      print("\033[33m=\033[0m"*50+'\n'+"\033[31mWrong answer, try again !\033[0m\n" + "\033[33m=\033[0m"*50)
                 else:
-                    print("\033[33m=\033[0m"*50+'\n'+rainbow_rgb("Well done ! It's the right answer !")+"\n" + "\033[33m=\033[0m"*50)
+                    print("\033[33m=\033[0m"*50+'\n'+utils.rainbow_rgb("Well done ! It's the right answer !")+"\n" + "\033[33m=\033[0m"*50)
+                    
+                    utils.set_solved_clue(date)
+                    
                     end_game_input = input('What next ? \n'
                     '\033[32mmain\033[0m to go to the main menu\n' \
                     '\033[32mnext\033[0m to go to the next clue (by date)\n' \
@@ -117,7 +104,7 @@ def game_handler(date:str):
         print("\033[33m=\033[0m"*50+'\n'+"Please provide a date after 02/10/2026 !\n" + "\033[33m=\033[0m"*50)
         start_game_handler()
 
-    clue = decoder.get_clue(date)
+    clue = utils.get_clue(date)
 
     if clue == None:
         print("\033[33m=\033[0m"*50+'\n'+"Try again !\n" + "\033[33m=\033[0m"*50)
