@@ -2,6 +2,7 @@ import base64
 import json
 import os
 import math
+import re
 
 JSON_FILE = "minutecryptic.json"
 
@@ -42,6 +43,10 @@ def get_answer(date:str, file_path:str = JSON_FILE):
 
 def check_answer(date:str, proposed_answer):
     real_answer = hint_decoder(get_answer(date))
+
+    real_answer = re.sub(r'[^a-zA-Z0-9]', '', real_answer).lower()
+    proposed_answer = re.sub(r'[^a-zA-Z0-9]', '', proposed_answer).lower()
+
     return real_answer.strip().lower() == proposed_answer.strip().lower()
 
 def get_hint(date:str, type:str, *args, file_path:str = JSON_FILE):
@@ -117,3 +122,6 @@ def rainbow_rgb(string:str):
 
     result.append("\033[0m")
     return "".join(result)
+
+if __name__ == "__main__":
+    print(base64.b64encode("uneréponseavecespaces".encode("utf-8")).decode("utf-8"))

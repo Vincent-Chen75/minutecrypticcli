@@ -65,7 +65,8 @@ def clue_handler(clue, date):
                 show_in_game_help()
             case ["quit"] | ["exit"]:
                 sys.exit()
-            case [proposed_answer]:
+            case [*words] if words:
+                proposed_answer = " ".join(words)
                 result = utils.check_answer(date, proposed_answer)
                 if not result:
                      print("\033[33m=\033[0m"*50+'\n'+"\033[31mWrong answer, try again !\033[0m\n" + "\033[33m=\033[0m"*50)
