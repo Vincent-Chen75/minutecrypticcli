@@ -112,8 +112,8 @@ with sync_playwright() as p:
             answer += letter
 
     if (len(answer) != count):
-        print("Answer length mismatch !")
-        raise
+        raise ValueError(f"Mismatch between answer length ({len(answer)}) and clue count ({count})")
+    
     answer_encoded = base64.b64encode(answer.encode("utf-8")).decode("utf-8")
     
     browser.close()
