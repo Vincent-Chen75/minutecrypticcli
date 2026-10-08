@@ -111,6 +111,9 @@ with sync_playwright() as p:
             letter = span.inner_text().strip()
             answer += letter
 
+    if (len(answer) != count):
+        print("Answer length mismatch !")
+        raise
     answer_encoded = base64.b64encode(answer.encode("utf-8")).decode("utf-8")
     
     browser.close()
